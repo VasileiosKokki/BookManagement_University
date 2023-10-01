@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title></title>
+</head>
+<body>
+    <table style="text-align: left;">
+        <tr>
+            <td>Add New Book</td>
+            <td>
+                <input type="text" id="author" placeholder="Author" maxlength=25 required>
+                <input type="text" id="title" placeholder="Title" maxlength=40 required>
+                <!-- <input type="text" id="genre" placeholder="Genre" required> -->
+                <select name="genre" id="genre">
+                    <option value=""> Select Genre</option>
+                    <option value="Science fiction"> Science fiction</option>
+                    <option value="Satire"> Satire</option>
+                    <option value="Drama"> Drama</option>
+                    <option value="Action and Adventure"> Action and Adventure</option>
+                    <option value="Romance"> Romance</option>
+                    <option value="Mystery"> Mystery</option>
+                    <option value="Horror"> Horror</option>
+                </select>
+                <input type="number" id="price" step="0.01" placeholder="Price" required>
+                <input type="button" id="send_request1" value="Send Request!">
+            </td>
+        </tr>
+        <tr>
+            <td>Search Book By Keyword</td>
+            <td>
+                <input type="text" id="keyword" placeholder="Title">
+                <input type="button" id="send_request2" value="Send Request!">
+            </td>
+        </tr> 
+    </table>
+    <div id="results"></div>
+</body>
+<script type="text/javascript">
+    class Book{
+        constructor(author, title, genre, price){           
+            this.author = author;
+            this.title = title;
+            this.genre = genre;
+            this.price = price;
+        }
+    }
+
+
+    document.getElementById('send_request1').addEventListener('click',async (e)=>{  
+        const author = document.getElementById('author').value;
+        const title = document.getElementById('title').value;
+        const genre = document.getElementById('genre').value;
+        const price = document.getElementById('price').value;
+        const book = new Book(author,title,genre,price);
+
+
+        const url = 'http://localhost:3000/books';
+        const result = await fetch(url,{
+            method:'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(book)
+        });
+        // try {
+            const body = await result.json();
+            console.log(body);
+            const bodyElem = document.getElementById('results');
+            bodyElem.textContent = '';
+            const pElem = document.createElement('p');
+            pElem.textContent = `status: ${JSON.stringify(body)}`;
+            bodyElem.appendChild(pElem);
+        // } catch (error) {
+        //    console.log('Error:', error);
+        // }
+    });
+
+
+    document.getElementById('send_request2').addEventListener('click',async (e)=>{  
+        const keyword = document.getElementById('keyword').value;
+
+
+        const url = 'http://localhost:3000/books/' + encodeURIComponent(keyword);
+        const result = await fetch(url,{
+            method:'GET',
+            headers: {
+                "Content-Type": "application/json"
+            }           
+        });
+        // try {
+            const body = await result.json();
+            console.log(body);
+            const bodyElem = document.getElementById('results');
+            bodyElem.textContent = '';
+            for (const result of body){
+                const pElem = document.createElement('p');
+                pElem.textContent += `id: ${result.id} author: ${result.author} title: ${result.title} genre: ${result.genre} price: ${result.price}`
+                bodyElem.appendChild(pElem);
+            }
+        // } catch (error) {
+        //    console.log('Error:', error);
+        // }
+    });
+</script>
+</html>
